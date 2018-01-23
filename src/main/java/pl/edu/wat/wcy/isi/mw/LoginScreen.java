@@ -57,7 +57,7 @@ public class LoginScreen extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(final Stage primaryStage) throws Exception {
         stage = primaryStage;
         Parent parent = FXMLLoader.load(ProgramController.loadFXML("LoginScreen.fxml"));
         Scene loginScreen = new Scene(parent, 440, 329);
@@ -71,8 +71,13 @@ public class LoginScreen extends Application {
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {
-                entityManager.close();
-                entityManagerFactory.close();
+                try {
+                    entityManager.close();
+                    entityManagerFactory.close();
+                }catch (NullPointerException e){
+                }finally {
+                    primaryStage.close();
+                }
             }
         });
     }
