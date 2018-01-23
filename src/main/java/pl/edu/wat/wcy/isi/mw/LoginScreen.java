@@ -1,6 +1,7 @@
 package pl.edu.wat.wcy.isi.mw;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -8,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -19,14 +21,16 @@ public class LoginScreen extends Application {
 
     private static Stage stage;
     private static Scene menu;
-    @FXML TextField login;
-    @FXML PasswordField password;
+    @FXML
+    private TextField login;
+    @FXML
+    private PasswordField password;
 
-    public static  EntityManagerFactory entityManagerFactory;
-    public static  EntityManager entityManager;
-    public static  String peselPol;
+    public static EntityManagerFactory entityManagerFactory;
+    public static EntityManager entityManager;
+    public static String peselPol;
 
-    public void loginButton () {
+    public void loginButton() {
         String userLogin = login.getText();
         String userPass = password.getText();
         if (userLogin.equals(userPass)) {
@@ -35,26 +39,25 @@ public class LoginScreen extends Application {
                 entityManagerFactory = Persistence.createEntityManagerFactory("cepik");
                 entityManager = entityManagerFactory.createEntityManager();
                 stage.setScene(menu);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 NewAlert newAlert = new NewAlert("Error", "Brak polaczenia",
                         "Sprawdz polaczenie z internetem");
                 newAlert.ErrorInLogin();
             }
 
 
-            if(login.getText().length() == 0){
+            if (login.getText().length() == 0) {
                 peselPol = "84025099595";
-            }else{
+            } else {
                 peselPol = login.getText();
             }
 
-        }
-        else
-            new NewAlert ("Error", "Błąd", "Wprowadzono złe hasło");
+        } else
+            new NewAlert("Error", "Błąd", "Wprowadzono złe hasło");
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
         stage = primaryStage;
         Parent parent = FXMLLoader.load(ProgramController.loadFXML("LoginScreen.fxml"));
         Scene loginScreen = new Scene(parent, 440, 329);
@@ -64,6 +67,14 @@ public class LoginScreen extends Application {
         primaryStage.setScene(loginScreen);
         primaryStage.setResizable(false);
         primaryStage.show();
+
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                entityManager.close();
+                entityManagerFactory.close();
+            }
+        });
     }
 
     public static void main(String[] args) {
