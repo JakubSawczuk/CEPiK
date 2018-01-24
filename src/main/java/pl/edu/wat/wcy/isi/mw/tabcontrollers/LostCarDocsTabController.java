@@ -10,19 +10,29 @@ import pl.edu.wat.wcy.isi.mw.database.entity.TemporaryAuthorisation;
 import pl.edu.wat.wcy.isi.mw.database.entity.WithdrawnAuthorisation;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-public class LostCarDocsTabController extends CarTabController{
+public class LostCarDocsTabController extends CarTabController {
 
-    @FXML public GridPane LostCarDocsTabPane;
-    @FXML ComboBox <String> SearchMethodComboBox;
+    @FXML
+    public GridPane LostCarDocsTabPane;
+    @FXML
+    ComboBox<String> SearchMethodComboBox;
     private GridPane prevSearchPane = null;
+
+    private List<WithdrawnAuthorisation> queryChceckReturnDateRegistrationDocument(int Aut_IdAuth) {
+        return LoginScreen.entityManager
+                .createQuery("SELECT e FROM withdrawnauthorisation e WHERE Aut_IdAuth = ?1")
+                .setParameter(1, Aut_IdAuth)
+                .getResultList();
+    }
 
     public void changeSearchMethod() {
         String searchMethod = SearchMethodComboBox.getValue();
         GridPane newSearch = super.getSearch(searchMethod);
         if (newSearch != null) {
             if (prevSearchPane != null) LostCarDocsTabPane.getChildren().remove(prevSearchPane);
-            LostCarDocsTabPane.add(newSearch,0,2,1,2);
+            LostCarDocsTabPane.add(newSearch, 0, 2, 1, 2);
             prevSearchPane = newSearch;
         }
     }
@@ -41,25 +51,45 @@ public class LostCarDocsTabController extends CarTabController{
     }
 
     public void withdrawnRegistraionDocument(String vin) {
+        boolean validityWithdrawnRegisterDocument = false;
+        int idAuthDrivingLicense = getIdRegistrationDocument(vin).getIdAuth();
+
         try {
-            int idAuthDrivingLicense = getIdRegistrationDocument(vin).getIdAuth();
-            RegistrationDocument registrationDocument = new RegistrationDocument();
-            registrationDocument.setIdAuth(idAuthDrivingLicense);
+            List<WithdrawnAuthorisation> withdrawnAuthorisationList = queryChceckReturnDateRegistrationDocument(idAuthDrivingLicense);
+            WithdrawnAuthorisation withdrawnAuthorisationLast = withdrawnAuthorisationList.get(withdrawnAuthorisationList.size() - 1);
+            try {
+                validityWithdrawnRegisterDocument = LocalDateTime.now().isBefore(withdrawnAuthorisationLast.getReturnDateWithdrawn());
+            } catch (NullPointerException e) {
+                validityWithdrawnRegisterDocument = true;
+            }
 
-            WithdrawnAuthorisation withdrawnAuthorisation = new WithdrawnAuthorisation();
-            withdrawnAuthorisation.setDataWithdrawn(LocalDateTime.now());
-            withdrawnAuthorisation.setRegistrationDocument(registrationDocument);
+            if (validityWithdrawnRegisterDocument) {
+                new NewAlert("Information", "Blad dodawania zgloszenia",
+                        "Dowod rejestracyjny zostal juz odebrany wczesniej");
+            } else {
+                try {
+                    RegistrationDocument registrationDocument = new RegistrationDocument();
+                    registrationDocument.setIdAuth(idAuthDrivingLicense);
 
-            commitData(withdrawnAuthorisation);
-            NewAlert newAlert = new NewAlert("Information", "Zgloszenie zostalo dodane",
-                    "Dodanie zgloszenia utraty dowodu rejestracyjnego przebieglo pomyslnie");
-        } catch (IndexOutOfBoundsException e) {
-            NewAlert newAlert = new NewAlert("Error", "Błąd w wyszukiwaniu",
-                    "Sprawdz poprawność wpisanego VINu");
+                    WithdrawnAuthorisation withdrawnAuthorisation = new WithdrawnAuthorisation();
+                    withdrawnAuthorisation.setDataWithdrawn(LocalDateTime.now());
+                    withdrawnAuthorisation.setRegistrationDocument(registrationDocument);
+
+                    commitData(withdrawnAuthorisation);
+                    new NewAlert("Information", "Zgloszenie zostalo dodane",
+                            "Dodanie zgloszenia utraty dowodu rejestracyjnego przebieglo pomyslnie");
+                } catch (IndexOutOfBoundsException e) {
+                    new NewAlert("Error", "Błąd w wyszukiwaniu",
+                            "Sprawdz poprawność wpisanego VINu");
+                }
+            }
+        } catch (Exception e) {
+            new NewAlert("Error", "Blad krytyczny",
+                    "Wystapil blad krytyczny aplikacji. Zglos go przelozonemu");
         }
     }
 
-    public void addTemporaryAuthorisation(String vin){
+    public void addTemporaryAuthorisation(String vin) {
         try {
             int idAuthDrivingLicense = getIdRegistrationDocument(vin).getIdAuth();
             RegistrationDocument registrationDocument = new RegistrationDocument();
@@ -71,10 +101,13 @@ public class LostCarDocsTabController extends CarTabController{
             temporaryAuthorisation.setRegistrationDocument(registrationDocument);
 
             commitData(temporaryAuthorisation);
-            NewAlert newAlert = new NewAlert("Information", "Zgloszenie zostalo dodane",
-                    "Dodanie zgloszenia wystawienia tymczasowego prawa jazdy przebieglo pomyslnie");
+
+            new NewAlert("Information", "Zgloszenie zostalo dodane",
+                    "Dodanie zgloszenia wystawienia tymczasowego dowodu rejestracyjnego przebieglo pomyslnie");
+
+            addTemporaryAuthorisation(vin);
         } catch (IndexOutOfBoundsException e) {
-            NewAlert newAlert = new NewAlert("Error", "Błąd w wyszukiwaniu",
+            new NewAlert("Error", "Błąd w wyszukiwaniu",
                     "Sprawdz poprawność wpisanego VINu");
         }
     }

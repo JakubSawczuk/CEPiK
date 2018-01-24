@@ -10,10 +10,11 @@ import pl.edu.wat.wcy.isi.mw.LoginScreen;
 import pl.edu.wat.wcy.isi.mw.NewAlert;
 import pl.edu.wat.wcy.isi.mw.SearchController;
 import pl.edu.wat.wcy.isi.mw.TabRow;
-import pl.edu.wat.wcy.isi.mw.database.entity.Driver;
-import pl.edu.wat.wcy.isi.mw.database.entity.Vehicle;
+import pl.edu.wat.wcy.isi.mw.database.entity.*;
 import pl.edu.wat.wcy.isi.mw.tabcontrollers.LostCarDocsTabController;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +35,27 @@ public class SearchByRegisterNumber extends SearchController {
     private TableView<TabRow> table = null;
     private ArrayList<String> vehiclePerson;
 
+
+    public RegistrationDocument getIdRegistrationDocument(String VIN) {
+        return (RegistrationDocument) LoginScreen.entityManager
+                .createQuery("SELECT d FROM registrationdocument d  WHERE vin = ?1")
+                .setParameter(1, VIN)
+                .getSingleResult();
+    }
+
+    private List<WithdrawnAuthorisation> queryChceckReturnDateRegistrationDocument(int Aut_IdAuth) {
+        return LoginScreen.entityManager
+                .createQuery("SELECT e FROM withdrawnauthorisation e WHERE Aut_IdAuth = ?1")
+                .setParameter(1, Aut_IdAuth)
+                .getResultList();
+    }
+
+    private List<TemporaryAuthorisation> queryChceckExpDateTemporaryAuth(int Aut_IdAuth) {
+        return LoginScreen.entityManager
+                .createQuery("SELECT e FROM temporaryauthorisation e WHERE Aut_IdAuth = ?1")
+                .setParameter(1, Aut_IdAuth)
+                .getResultList();
+    }
 
     private List<Vehicle> queryGetVehicleByRegistraionNumber() {
         return LoginScreen.entityManager
@@ -57,8 +79,44 @@ public class SearchByRegisterNumber extends SearchController {
                 vehiclePerson.add(aVehicleOwner.getPeselDrv());
             }
         } else {
-            NewAlert newAlert = new NewAlert("Information", "Blad w wyszukiwaniu",
+             new NewAlert("Information", "Blad w wyszukiwaniu",
                     "Wlasciciel nie jest kierowca");
+        }
+    }
+
+    public void checkWithDrawnAndTemporaryAuthorisationRD() {
+        boolean validityWithdrawnRegisterDocument = false;
+
+        try {
+            int idAuthDrivingLicense = getIdRegistrationDocument(getVIN()).getIdAuth();
+            List<WithdrawnAuthorisation> withdrawnAuthorisationList = queryChceckReturnDateRegistrationDocument(idAuthDrivingLicense);
+            WithdrawnAuthorisation withdrawnAuthorisationLast = withdrawnAuthorisationList.get(withdrawnAuthorisationList.size() - 1);
+            try {
+                validityWithdrawnRegisterDocument = LocalDateTime.now().isBefore(withdrawnAuthorisationLast.getReturnDateWithdrawn());
+            } catch (NullPointerException e) {
+                validityWithdrawnRegisterDocument = true;
+            }
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            List<TemporaryAuthorisation> temporaryAuthorisationList = queryChceckExpDateTemporaryAuth(idAuthDrivingLicense);
+            TemporaryAuthorisation temporaryAuthorisationLast = temporaryAuthorisationList.get(temporaryAuthorisationList.size() - 1);
+            boolean validityTemporaryAuth = LocalDateTime.now().isBefore(temporaryAuthorisationLast.getExpirationDateTempAuth());
+
+            LocalDateTime withdrawnAuth = withdrawnAuthorisationLast.getDataWithdrawn();
+            String formattedwithdrawnAuth = withdrawnAuth.format(formatter);
+            LocalDateTime temporaryAuth = temporaryAuthorisationLast.getExpirationDateTempAuth();
+            String formattedTemporaryAuth = temporaryAuth.format(formatter);
+
+            if (validityWithdrawnRegisterDocument) {
+                new NewAlert("Information", "Nie wazny dowod rejestracyjny",
+                        "Dowod rejestracyjny pojazdu zostal zatrzymany: " + formattedwithdrawnAuth);
+                if (validityTemporaryAuth)
+                    new NewAlert("Information", "Nie wazne tymczasowy dowod rejestracyjny",
+                            "Tymczasowy dowod rejestracyjny utracil waznosc: " + formattedTemporaryAuth);
+            }
+
+
+        } catch (Exception e) {
+
         }
     }
 
@@ -81,6 +139,7 @@ public class SearchByRegisterNumber extends SearchController {
     public void RegisterNumberSearchClicked() {
         try {
             makeCarTable(queryGetVehicleByRegistraionNumber().get(0));
+            checkWithDrawnAndTemporaryAuthorisationRD();
             makeButton();
         } catch (HibernateException e) {
             new NewAlert("Error", "Brak połączenia", "Sprawdz połączenie internetowe");
@@ -114,7 +173,7 @@ public class SearchByRegisterNumber extends SearchController {
         String type = grid.getParent().getId();
         if (type.equals("SearchCarTabPane")) {
             if (getVIN() == null) {
-                NewAlert newAlert = new NewAlert("Error", "Blad wyswietlania wlascicieli", "Nie zostal wybrany VIN");
+                new NewAlert("Error", "Blad wyswietlania wlascicieli", "Nie zostal wybrany VIN");
             } else {
                 getVehiclesOwnerByVin();
                 super.searchPerson(vehiclePerson, grid);
@@ -125,7 +184,6 @@ public class SearchByRegisterNumber extends SearchController {
             } else {
                 LostCarDocsTabController lostCarDocsTabController = new LostCarDocsTabController();
                 lostCarDocsTabController.withdrawnRegistraionDocument(getVIN());
-                lostCarDocsTabController.addTemporaryAuthorisation(getVIN());
             }
         }
     }

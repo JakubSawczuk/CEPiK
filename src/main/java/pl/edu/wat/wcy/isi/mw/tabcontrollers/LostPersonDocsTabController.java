@@ -63,7 +63,8 @@ public class LostPersonDocsTabController extends PersonTabController {
         } catch (IndexOutOfBoundsException e) {
         }
         if (validity) {
-            new NewAlert("Information", "Blad dodawania zgloszenia", "Uprawnienia kierowcy zostaly juz odebrane wczesniej");
+            new NewAlert("Information", "Blad dodawania zgloszenia",
+                    "Uprawnienia kierowcy zostaly juz odebrane wczesniej");
         } else {
             try {
                 DrivingLicense drivingLicense = new DrivingLicense();
