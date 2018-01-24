@@ -84,7 +84,6 @@ public class SearchByPESEL extends SearchController {
     public void checkWithDrawnAndTemporaryAuthorisationDL() {
         try {
             int idAuthDrivingLicense = getIdDrivingLicense(PESELnumber.getText()).getIdAuth();
-            System.out.println(idAuthDrivingLicense);
 
             List<WithdrawnAuthorisation> withdrawnAuthorisationList = queryChceckReturnDateDrivingLicense(idAuthDrivingLicense);
             WithdrawnAuthorisation withdrawnAuthorisationLast = withdrawnAuthorisationList.get(withdrawnAuthorisationList.size() - 1);
@@ -101,12 +100,12 @@ public class SearchByPESEL extends SearchController {
             String formattedTemporaryAuth = temporaryAuth.format(formatter);
 
             if (validityWithDrawnLicense) {
-                new NewAlert("Information", "Nie wazne prawo jazdy",
+                new NewAlert("Information", "Niewazne prawo jazdy",
                         "Prawo jazdy kierowcy zostalo zatrzymane: " + formattedwithdrawnAuth);
 
                 if (validityTemporaryAuth)
-                    new NewAlert("Information", "Nie wazne tymczasowe prawo jazdy",
-                            "Tymczasowe prawo jazdy utracilo waznosc: " + formattedTemporaryAuth);
+                    new NewAlert("Information", "Niewazne tymczasowe prawo jazdy",
+                            "Tymczasowe prawo jazdy traci waznosc: " + formattedTemporaryAuth);
             }
 
         } catch (Exception e) {

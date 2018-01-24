@@ -131,11 +131,11 @@ public class SearchByName extends SearchController {
             String formattedTemporaryAuth = temporaryAuth.format(formatter);
 
             if (validityWithDrawnLicense) {
-                new NewAlert("Information", "Nie wazne prawo jazdy",
+                new NewAlert("Information", "Niewazne prawo jazdy",
                         "Prawo jazdy kierowcy zostalo zatrzymane: " + formattedwithdrawnAuth);
 
                 if (validityTemporaryAuth)
-                    new NewAlert("Information", "Nie wazne tymczasowe prawo jazdy",
+                    new NewAlert("Information", "Niewazne tymczasowe prawo jazdy",
                             "Tymczasowe prawo jazdy utracilo waznosc: " + formattedTemporaryAuth);
             }
 

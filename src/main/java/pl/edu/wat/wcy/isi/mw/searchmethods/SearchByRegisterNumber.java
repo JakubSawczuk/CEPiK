@@ -107,11 +107,11 @@ public class SearchByRegisterNumber extends SearchController {
             String formattedTemporaryAuth = temporaryAuth.format(formatter);
 
             if (validityWithdrawnRegisterDocument) {
-                new NewAlert("Information", "Nie wazny dowod rejestracyjny",
+                new NewAlert("Information", "Niewazny dowod rejestracyjny",
                         "Dowod rejestracyjny pojazdu zostal zatrzymany: " + formattedwithdrawnAuth);
                 if (validityTemporaryAuth)
-                    new NewAlert("Information", "Nie wazne tymczasowy dowod rejestracyjny",
-                            "Tymczasowy dowod rejestracyjny utracil waznosc: " + formattedTemporaryAuth);
+                    new NewAlert("Information", "Niewazny tymczasowy dowod rejestracyjny",
+                            "Tymczasowy dowod rejestracyjny traci waznosc: " + formattedTemporaryAuth);
             }
 
 

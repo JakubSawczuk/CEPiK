@@ -91,10 +91,10 @@ public class SearchByVIN extends SearchController {
             String formattedTemporaryAuth = temporaryAuth.format(formatter);
 
             if (validityWithdrawnRegisterDocument) {
-                new NewAlert("Information", "Nie wazny dowod rejestracyjny",
+                new NewAlert("Information", "Niewazny dowod rejestracyjny",
                         "Dowod rejestracyjny pojazdu zostal zatrzymany: " + formattedwithdrawnAuth);
                 if (validityTemporaryAuth)
-                    new NewAlert("Information", "Nie wazny tymczasowy dowod rejestracyjny",
+                    new NewAlert("Information", "Niewazny tymczasowy dowod rejestracyjny",
                             "Tymczasowy dowod rejestracyjny utracil waznosc: " + formattedTemporaryAuth);
             }
 
