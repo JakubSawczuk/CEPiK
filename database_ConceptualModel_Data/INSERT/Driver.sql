@@ -12,3 +12,5 @@ Insert into driver(PeselDrv,SurnameDrv,FirstNameDrv,SecondNameDrv,adress_IdAdres
 values(98908462392,'Abacki','Mikolaj','Andrzej',11);
 Insert into driver(PeselDrv,SurnameDrv,FirstNameDrv,SecondNameDrv,adress_IdAdress)
 values(88497228648,'Lisek','Monika',null,12);
+Insert into driver(PeselDrv,SurnameDrv,FirstNameDrv,SecondNameDrv,adress_IdAdress)
+values(84846110711,'Kowalska','Anna','Natalia',2);

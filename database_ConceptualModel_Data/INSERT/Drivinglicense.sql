@@ -16,3 +16,5 @@ Insert into drivinglicense(KategoryDL,DateAuth,ExpirationDateAuth,IdAuth,PeselDr
 values('B','2016-02-14','2019-02-14',8,98908462392,null);
 Insert into drivinglicense(KategoryDL,DateAuth,ExpirationDateAuth,IdAuth,PeselDrv,CommentAuth)
 values('B','2017-03-13','2018-03-13',9,88497228648,null);
+Insert into drivinglicense(KategoryDL,DateAuth,ExpirationDateAuth,IdAuth,PeselDrv,CommentAuth)
+values('B','2017-03-13','2018-03-13',10,84846110711,null);
