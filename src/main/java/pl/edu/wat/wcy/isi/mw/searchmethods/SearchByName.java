@@ -171,25 +171,29 @@ public class SearchByName extends SearchController {
     private void savePersonDataToTable() {
         for (int i = 0; i < queryGetDriverByName().size(); i++) {
             Person person = new Person();
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDateTime dateTimeExp = queryGetDrivingLicenseByPesel(i).get(0).getExpirationDateAuth();
+                LocalDateTime dateTime = queryGetDrivingLicenseByPesel(i).get(0).getDateAuth();
+                String formattedDateTimeExp = dateTimeExp.format(formatter);
+                String formattedDateTime = dateTime.format(formatter);
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDateTime dateTimeExp = queryGetDrivingLicenseByPesel(i).get(0).getExpirationDateAuth();
-            LocalDateTime dateTime = queryGetDrivingLicenseByPesel(i).get(0).getDateAuth();
-            String formattedDateTimeExp = dateTimeExp.format(formatter);
-            String formattedDateTime = dateTime.format(formatter);
-
-            person.setPesel(queryGetDriverByName().get(i).getPeselDrv());
-            person.setSurname(queryGetDriverByName().get(i).getSurnameDrv());
-            person.setFirstName(queryGetDriverByName().get(i).getFirstNameDrv());
-            person.setSecondName(queryGetDriverByName().get(i).getSecondNameDrv());
-            person.setResidenceNr(Integer.toString(queryGetAdressByName(i).get(0).getResidenceNr()));
-            person.setCity(queryGetAdressByName(i).get(0).getCity());
-            person.setStreet(queryGetAdressByName(i).get(0).getStreet());
-            person.setBuildingNr(queryGetAdressByName(i).get(0).getBuildingNr());
-            person.setCategoryDL(queryGetDrivingLicenseByPesel(i).get(0).getKategoryDL());
-            person.setCommentAuth(queryGetDrivingLicenseByPesel(i).get(0).getCommentAuth());
-            person.setExpDateAuth(formattedDateTimeExp);
-            person.setDateAuth(formattedDateTime);
+                person.setPesel(queryGetDriverByName().get(i).getPeselDrv());
+                person.setSurname(queryGetDriverByName().get(i).getSurnameDrv());
+                person.setFirstName(queryGetDriverByName().get(i).getFirstNameDrv());
+                person.setSecondName(queryGetDriverByName().get(i).getSecondNameDrv());
+                person.setResidenceNr(Integer.toString(queryGetAdressByName(i).get(0).getResidenceNr()));
+                person.setCity(queryGetAdressByName(i).get(0).getCity());
+                person.setStreet(queryGetAdressByName(i).get(0).getStreet());
+                person.setBuildingNr(queryGetAdressByName(i).get(0).getBuildingNr());
+                person.setCategoryDL(queryGetDrivingLicenseByPesel(i).get(0).getKategoryDL());
+                person.setCommentAuth(queryGetDrivingLicenseByPesel(i).get(0).getCommentAuth());
+                person.setExpDateAuth(formattedDateTimeExp);
+                person.setDateAuth(formattedDateTime);
+            } catch (IndexOutOfBoundsException e) {
+                new NewAlert("Error", "Blad wyszukwiania",
+                        "Nie zostal znaleziony kierowca o peselu: " + queryGetDriverByName().get(i).getPeselDrv());
+            }
 
             try {
                 person.setPenalty(Long.toString(queryGetPenaltyDriver(i).get(0)));
