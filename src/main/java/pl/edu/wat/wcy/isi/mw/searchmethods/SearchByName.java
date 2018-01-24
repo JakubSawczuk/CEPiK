@@ -38,6 +38,14 @@ public class SearchByName extends SearchController {
     private TableView<Person> tableView;
     private ArrayList<String> personVehicles;
 
+
+    public DrivingLicense getIdDrivingLicense(String pesel) {
+        return (DrivingLicense) LoginScreen.entityManager
+                .createQuery("SELECT d FROM drivinglicense d  WHERE PeselDrv = ?1")
+                .setParameter(1, pesel)
+                .getSingleResult();
+    }
+
     public List<DrivingLicense> queryGetDrivingLicenseByPesel(int index) {
         return LoginScreen.entityManager
                 .createQuery("SELECT d FROM drivinglicense d WHERE peselDrv=?1 ")
@@ -89,13 +97,6 @@ public class SearchByName extends SearchController {
                 .getResultList();
     }
 
-    public DrivingLicense getIdDrivingLicense(String pesel) {
-        return (DrivingLicense) LoginScreen.entityManager
-                .createQuery("SELECT d FROM drivinglicense d  WHERE PeselDrv = ?1")
-                .setParameter(1, pesel)
-                .getSingleResult();
-    }
-
 
     private TableColumn<Person, String> makeColumn(String text, String value) {
         TableColumn<Person, String> tableColumn = new TableColumn<Person, String>(text);
@@ -111,10 +112,10 @@ public class SearchByName extends SearchController {
         GridPane.setMargin(tableView, new Insets(0, 20, 5, 20));
     }
 
-    public void checkWithDrawnAndTemporaryAuthorisation() {
+    public void checkWithDrawnAndTemporaryAuthorisationDL() {
+
         try {
             int idAuthDrivingLicense = getIdDrivingLicense(getPESEL()).getIdAuth();
-
             List<WithdrawnAuthorisation> withdrawnAuthorisationList = queryChceckReturnDateDrivingLicense(idAuthDrivingLicense);
             WithdrawnAuthorisation withdrawnAuthorisationLast = withdrawnAuthorisationList.get(withdrawnAuthorisationList.size() - 1);
             boolean validityWithDrawnLicense = LocalDateTime.now().isBefore(withdrawnAuthorisationLast.getReturnDateWithdrawn());
@@ -129,13 +130,14 @@ public class SearchByName extends SearchController {
             LocalDateTime temporaryAuth = temporaryAuthorisationLast.getExpirationDateTempAuth();
             String formattedTemporaryAuth = temporaryAuth.format(formatter);
 
-            if (validityWithDrawnLicense)
+            if (validityWithDrawnLicense) {
                 new NewAlert("Information", "Nie wazne prawo jazdy",
                         "Prawo jazdy kierowcy zostalo zatrzymane: " + formattedwithdrawnAuth);
 
-            if (validityTemporaryAuth)
-                new NewAlert("Information", "Nie wazne tymczasowe prawo jazdy",
-                        "Tymczasowe prawo jazdy utracilo waznosc: " + formattedTemporaryAuth);
+                if (validityTemporaryAuth)
+                    new NewAlert("Information", "Nie wazne tymczasowe prawo jazdy",
+                            "Tymczasowe prawo jazdy utracilo waznosc: " + formattedTemporaryAuth);
+            }
 
         } catch (Exception e) {
 
@@ -203,10 +205,10 @@ public class SearchByName extends SearchController {
 
         if (queryGetDriverByName().size() != 0) {
             if (queryGetAdressByName(0).size() != 0) {
-                checkWithDrawnAndTemporaryAuthorisation();
                 makeTable();
                 savePersonDataToTable();
                 makeButton();
+                checkWithDrawnAndTemporaryAuthorisationDL();
             } else {
                 new NewAlert("Error", "Blad w wyszukiwaniu",
                         "Nie zostal znaleziony kierowca o takim adresie zameldowania");

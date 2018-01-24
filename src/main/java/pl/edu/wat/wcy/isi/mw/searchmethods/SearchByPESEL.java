@@ -81,40 +81,42 @@ public class SearchByPESEL extends SearchController {
                 .getSingleResult().toString();
     }
 
-    public void checkWithDrawnAndTemporaryAuthorisation() {
+    public void checkWithDrawnAndTemporaryAuthorisationDL() {
         try {
-        int idAuthDrivingLicense = getIdDrivingLicense(PESELnumber.getText()).getIdAuth();
+            int idAuthDrivingLicense = getIdDrivingLicense(PESELnumber.getText()).getIdAuth();
+            System.out.println(idAuthDrivingLicense);
 
-        List<WithdrawnAuthorisation> withdrawnAuthorisationList = queryChceckReturnDateDrivingLicense(idAuthDrivingLicense);
-        WithdrawnAuthorisation withdrawnAuthorisationLast = withdrawnAuthorisationList.get(withdrawnAuthorisationList.size()-1);
-        boolean validityWithDrawnLicense = LocalDateTime.now().isBefore(withdrawnAuthorisationLast.getReturnDateWithdrawn());
+            List<WithdrawnAuthorisation> withdrawnAuthorisationList = queryChceckReturnDateDrivingLicense(idAuthDrivingLicense);
+            WithdrawnAuthorisation withdrawnAuthorisationLast = withdrawnAuthorisationList.get(withdrawnAuthorisationList.size() - 1);
+            boolean validityWithDrawnLicense = LocalDateTime.now().isBefore(withdrawnAuthorisationLast.getReturnDateWithdrawn());
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        List<TemporaryAuthorisation> temporaryAuthorisationList = queryChceckExpDateTemporaryAuth(idAuthDrivingLicense);
-        TemporaryAuthorisation temporaryAuthorisationLast = temporaryAuthorisationList.get(temporaryAuthorisationList.size()-1);
-        boolean validityTemporaryAuth = LocalDateTime.now().isBefore(temporaryAuthorisationLast.getExpirationDateTempAuth());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            List<TemporaryAuthorisation> temporaryAuthorisationList = queryChceckExpDateTemporaryAuth(idAuthDrivingLicense);
+            TemporaryAuthorisation temporaryAuthorisationLast = temporaryAuthorisationList.get(temporaryAuthorisationList.size() - 1);
+            boolean validityTemporaryAuth = LocalDateTime.now().isBefore(temporaryAuthorisationLast.getExpirationDateTempAuth());
 
-        LocalDateTime withdrawnAuth = withdrawnAuthorisationLast.getDataWithdrawn();
-        String formattedwithdrawnAuth = withdrawnAuth.format(formatter);
-        LocalDateTime temporaryAuth = temporaryAuthorisationLast.getExpirationDateTempAuth();
-        String formattedTemporaryAuth = temporaryAuth.format(formatter);
+            LocalDateTime withdrawnAuth = withdrawnAuthorisationLast.getDataWithdrawn();
+            String formattedwithdrawnAuth = withdrawnAuth.format(formatter);
+            LocalDateTime temporaryAuth = temporaryAuthorisationLast.getExpirationDateTempAuth();
+            String formattedTemporaryAuth = temporaryAuth.format(formatter);
 
-        if (validityWithDrawnLicense)
-            new NewAlert("Information", "Nie wazne prawo jazdy",
-                    "Prawo jazdy kierowcy zostalo zatrzymane: " + formattedwithdrawnAuth);
+            if (validityWithDrawnLicense) {
+                new NewAlert("Information", "Nie wazne prawo jazdy",
+                        "Prawo jazdy kierowcy zostalo zatrzymane: " + formattedwithdrawnAuth);
 
-        if (validityTemporaryAuth)
-            new NewAlert("Information", "Nie wazne tymczasowe prawo jazdy",
-                    "Tymczasowe prawo jazdy utracilo waznosc: " + formattedTemporaryAuth);
-
-            } catch (Exception e) {
-
+                if (validityTemporaryAuth)
+                    new NewAlert("Information", "Nie wazne tymczasowe prawo jazdy",
+                            "Tymczasowe prawo jazdy utracilo waznosc: " + formattedTemporaryAuth);
             }
+
+        } catch (Exception e) {
+
+        }
     }
 
     public void PESELsearchClicked() {
         if (queryGetDriverByPesel().size() != 0) {
-            checkWithDrawnAndTemporaryAuthorisation();
+            checkWithDrawnAndTemporaryAuthorisationDL();
             try {
                 makeTable(queryGetDriverByPesel().get(0), queryGetAdressByPesel().get(0),
                         queryGetDrivingLicenseByPesel().get(0), queryGetPenaltyDriver());
@@ -122,7 +124,7 @@ public class SearchByPESEL extends SearchController {
                 makeTable(queryGetDriverByPesel().get(0), queryGetAdressByPesel().get(0),
                         queryGetDrivingLicenseByPesel().get(0), "0");
             }
-                makeButton();
+            makeButton();
 
         } else {
             if (Table != null) grid.getChildren().remove(Table);
