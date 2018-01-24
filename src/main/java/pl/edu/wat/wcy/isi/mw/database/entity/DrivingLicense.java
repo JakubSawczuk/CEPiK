@@ -1,7 +1,7 @@
 package pl.edu.wat.wcy.isi.mw.database.entity;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 /**
  * Created by Kuba on 2018-01-18.
@@ -13,8 +13,8 @@ public class DrivingLicense {
     @GeneratedValue
     private int idAuth;
 
-    private Timestamp dateAuth;
-    private Timestamp expirationDateAuth;
+    private LocalDateTime dateAuth;
+    private LocalDateTime expirationDateAuth;
 
     private String commentAuth;
     private String KategoryDL;
@@ -31,19 +31,19 @@ public class DrivingLicense {
         this.idAuth = idAuth;
     }
 
-    public Timestamp getDateAuth() {
+    public LocalDateTime getDateAuth() {
         return dateAuth;
     }
 
-    public void setDateAuth(Timestamp dateAuth) {
+    public void setDateAuth(LocalDateTime dateAuth) {
         this.dateAuth = dateAuth;
     }
 
-    public Timestamp getExpirationDateAuth() {
+    public LocalDateTime getExpirationDateAuth() {
         return expirationDateAuth;
     }
 
-    public void setExpirationDateAuth(Timestamp expirationDateAuth) {
+    public void setExpirationDateAuth(LocalDateTime expirationDateAuth) {
         this.expirationDateAuth = expirationDateAuth;
     }
 

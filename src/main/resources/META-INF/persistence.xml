@@ -6,12 +6,12 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
-            <property name="javax.persistence.jdbc.user" value="sql11207305"/>
+<!--            <property name="javax.persistence.jdbc.user" value="sql11207305"/>
             <property name="javax.persistence.jdbc.password" value="H5x4JE31KF"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://sql11.freemysqlhosting.net:3306/sql11207305"/>
-            <!--<property name="javax.persistence.jdbc.user" value="admin"/>-->
-            <!--<property name="javax.persistence.jdbc.password" value="admin"/>-->
-            <!--<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/cepik"/>-->
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://sql11.freemysqlhosting.net:3306/sql11207305"/>-->
+            <property name="javax.persistence.jdbc.user" value="admin"/>
+            <property name="javax.persistence.jdbc.password" value="admin"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/cepik"/>
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>
             <property name="hibernate.show_sql" value="false"/>
             <property name="hibernate.hbm2ddl.auto" value="update" />

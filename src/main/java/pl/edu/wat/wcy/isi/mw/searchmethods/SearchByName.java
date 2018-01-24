@@ -12,11 +12,11 @@ import pl.edu.wat.wcy.isi.mw.LoginScreen;
 import pl.edu.wat.wcy.isi.mw.NewAlert;
 import pl.edu.wat.wcy.isi.mw.Person;
 import pl.edu.wat.wcy.isi.mw.SearchController;
-import pl.edu.wat.wcy.isi.mw.database.entity.Adress;
-import pl.edu.wat.wcy.isi.mw.database.entity.Driver;
-import pl.edu.wat.wcy.isi.mw.database.entity.Vehicle;
+import pl.edu.wat.wcy.isi.mw.database.entity.*;
 import pl.edu.wat.wcy.isi.mw.tabcontrollers.LostPersonDocsTabController;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +37,21 @@ public class SearchByName extends SearchController {
     public Button firstButton;
     private TableView<Person> tableView;
     private ArrayList<String> personVehicles;
+
+    public List<DrivingLicense> queryGetDrivingLicenseByPesel(int index) {
+        return LoginScreen.entityManager
+                .createQuery("SELECT d FROM drivinglicense d WHERE peselDrv=?1 ")
+                .setParameter(1, queryGetDriverByName().get(index).getPeselDrv())
+                .getResultList();
+    }
+
+    public List<Long> queryGetPenaltyDriver(int index) {
+        return LoginScreen.entityManager
+                .createQuery("SELECT SUM(points) FROM mandate d  WHERE PeselDrv = ?1 AND dateMandate > ?2")
+                .setParameter(1, queryGetDriverByName().get(index).getPeselDrv())
+                .setParameter(2, LocalDateTime.now().minusYears(1))
+                .getResultList();
+    }
 
 
     public List<Driver> queryGetDriverByName() {
@@ -59,6 +74,29 @@ public class SearchByName extends SearchController {
                 .getResultList();
     }
 
+
+    private List<WithdrawnAuthorisation> queryChceckReturnDateDrivingLicense(int IdAuth) {
+        return LoginScreen.entityManager
+                .createQuery("SELECT e FROM withdrawnauthorisation e WHERE IdAuth = ?1")
+                .setParameter(1, IdAuth)
+                .getResultList();
+    }
+
+    private List<TemporaryAuthorisation> queryChceckExpDateTemporaryAuth(int IdAuth) {
+        return LoginScreen.entityManager
+                .createQuery("SELECT e FROM temporaryauthorisation e WHERE IdAuth = ?1")
+                .setParameter(1, IdAuth)
+                .getResultList();
+    }
+
+    public DrivingLicense getIdDrivingLicense(String pesel) {
+        return (DrivingLicense) LoginScreen.entityManager
+                .createQuery("SELECT d FROM drivinglicense d  WHERE PeselDrv = ?1")
+                .setParameter(1, pesel)
+                .getSingleResult();
+    }
+
+
     private TableColumn<Person, String> makeColumn(String text, String value) {
         TableColumn<Person, String> tableColumn = new TableColumn<Person, String>(text);
         tableColumn.setCellValueFactory(new PropertyValueFactory<Person, String>(value));
@@ -73,6 +111,37 @@ public class SearchByName extends SearchController {
         GridPane.setMargin(tableView, new Insets(0, 20, 5, 20));
     }
 
+    public void checkWithDrawnAndTemporaryAuthorisation() {
+        try {
+            int idAuthDrivingLicense = getIdDrivingLicense(getPESEL()).getIdAuth();
+
+            List<WithdrawnAuthorisation> withdrawnAuthorisationList = queryChceckReturnDateDrivingLicense(idAuthDrivingLicense);
+            WithdrawnAuthorisation withdrawnAuthorisationLast = withdrawnAuthorisationList.get(withdrawnAuthorisationList.size() - 1);
+            boolean validityWithDrawnLicense = LocalDateTime.now().isBefore(withdrawnAuthorisationLast.getReturnDateWithdrawn());
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            List<TemporaryAuthorisation> temporaryAuthorisationList = queryChceckExpDateTemporaryAuth(idAuthDrivingLicense);
+            TemporaryAuthorisation temporaryAuthorisationLast = temporaryAuthorisationList.get(temporaryAuthorisationList.size() - 1);
+            boolean validityTemporaryAuth = LocalDateTime.now().isBefore(temporaryAuthorisationLast.getExpirationDateTempAuth());
+
+            LocalDateTime withdrawnAuth = withdrawnAuthorisationLast.getDataWithdrawn();
+            String formattedwithdrawnAuth = withdrawnAuth.format(formatter);
+            LocalDateTime temporaryAuth = temporaryAuthorisationLast.getExpirationDateTempAuth();
+            String formattedTemporaryAuth = temporaryAuth.format(formatter);
+
+            if (validityWithDrawnLicense)
+                new NewAlert("Information", "Nie wazne prawo jazdy",
+                        "Prawo jazdy kierowcy zostalo zatrzymane: " + formattedwithdrawnAuth);
+
+            if (validityTemporaryAuth)
+                new NewAlert("Information", "Nie wazne tymczasowe prawo jazdy",
+                        "Tymczasowe prawo jazdy utracilo waznosc: " + formattedTemporaryAuth);
+
+        } catch (Exception e) {
+
+        }
+    }
+
     private void makeColumns() {
         TableColumn<Person, String> firstName = makeColumn("Imię", "firstName");
         TableColumn<Person, String> secondName = makeColumn("Drugie imie", "secondName");
@@ -82,7 +151,13 @@ public class SearchByName extends SearchController {
         TableColumn<Person, String> street = makeColumn("Ulica", "street");
         TableColumn<Person, String> buildingNr = makeColumn("Numer domu", "buildingNr");
         TableColumn<Person, String> residenceNr = makeColumn("Numer mieszkania", "residenceNr");
-        tableView.getColumns().addAll(firstName, secondName, surName, pesel, city, street, buildingNr, residenceNr);
+        TableColumn<Person, String> dateAuth = makeColumn("Data wydania prawa jazdy", "dateAuth");
+        TableColumn<Person, String> expDateAuth = makeColumn("Data wygasniecia waznosci prawa jazdy", "expDateAuth");
+        TableColumn<Person, String> categoryDL = makeColumn("Kategorie", "categoryDL");
+        TableColumn<Person, String> commentAuth = makeColumn("Specjalne uprawnienia", "commentAuth");
+        TableColumn<Person, String> penalty = makeColumn("Punkty karne", "penalty");
+        tableView.getColumns().addAll(firstName, secondName, surName, pesel, city, street, buildingNr, residenceNr,
+                dateAuth, expDateAuth, categoryDL, commentAuth, penalty);
     }
 
     private String getPESEL() {
@@ -95,6 +170,12 @@ public class SearchByName extends SearchController {
         for (int i = 0; i < queryGetDriverByName().size(); i++) {
             Person person = new Person();
 
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDateTime dateTimeExp = queryGetDrivingLicenseByPesel(i).get(0).getExpirationDateAuth();
+            LocalDateTime dateTime = queryGetDrivingLicenseByPesel(i).get(0).getDateAuth();
+            String formattedDateTimeExp = dateTimeExp.format(formatter);
+            String formattedDateTime = dateTime.format(formatter);
+
             person.setPesel(queryGetDriverByName().get(i).getPeselDrv());
             person.setSurname(queryGetDriverByName().get(i).getSurnameDrv());
             person.setFirstName(queryGetDriverByName().get(i).getFirstNameDrv());
@@ -103,6 +184,16 @@ public class SearchByName extends SearchController {
             person.setCity(queryGetAdressByName(i).get(0).getCity());
             person.setStreet(queryGetAdressByName(i).get(0).getStreet());
             person.setBuildingNr(queryGetAdressByName(i).get(0).getBuildingNr());
+            person.setCategoryDL(queryGetDrivingLicenseByPesel(i).get(0).getKategoryDL());
+            person.setCommentAuth(queryGetDrivingLicenseByPesel(i).get(0).getCommentAuth());
+            person.setExpDateAuth(formattedDateTimeExp);
+            person.setDateAuth(formattedDateTime);
+
+            try {
+                person.setPenalty(Long.toString(queryGetPenaltyDriver(i).get(0)));
+            } catch (Exception e) {
+                person.setPenalty("0");
+            }
 
             tableView.getItems().add(person);
         }
@@ -112,6 +203,7 @@ public class SearchByName extends SearchController {
 
         if (queryGetDriverByName().size() != 0) {
             if (queryGetAdressByName(0).size() != 0) {
+                checkWithDrawnAndTemporaryAuthorisation();
                 makeTable();
                 savePersonDataToTable();
                 makeButton();
@@ -172,7 +264,6 @@ public class SearchByName extends SearchController {
             } else {
                 LostPersonDocsTabController lostPersonDocsTabController = new LostPersonDocsTabController();
                 lostPersonDocsTabController.withdrawnDrivingLicense(getPESEL());
-                lostPersonDocsTabController.addTemporaryAuthorisation(getPESEL());
             }
         } else if (type.equals("CreateTicketTabPane"))
             super.addCommentWindow(getPESEL(), text.getText());

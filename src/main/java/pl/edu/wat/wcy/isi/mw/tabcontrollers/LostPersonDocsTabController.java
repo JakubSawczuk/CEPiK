@@ -10,11 +10,14 @@ import pl.edu.wat.wcy.isi.mw.database.entity.TemporaryAuthorisation;
 import pl.edu.wat.wcy.isi.mw.database.entity.WithdrawnAuthorisation;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class LostPersonDocsTabController extends PersonTabController {
 
-    @FXML GridPane LostPersonDocsTabPane;
-    @FXML ComboBox <String> SearchMethodComboBox;
+    @FXML
+    GridPane LostPersonDocsTabPane;
+    @FXML
+    ComboBox<String> SearchMethodComboBox;
     private GridPane prevSearchPane = null;
 
     public void changeSearchMethod() {
@@ -23,7 +26,7 @@ public class LostPersonDocsTabController extends PersonTabController {
         if (newSearch != null) {
             if (prevSearchPane != null) LostPersonDocsTabPane.getChildren().remove(prevSearchPane);
             if (LostPersonDocsTabPane != null)
-                LostPersonDocsTabPane.add(newSearch,0,2,1,2);
+                LostPersonDocsTabPane.add(newSearch, 0, 2, 1, 2);
             else System.exit(0);
             prevSearchPane = newSearch;
         }
@@ -42,27 +45,48 @@ public class LostPersonDocsTabController extends PersonTabController {
                 .getSingleResult();
     }
 
+    private List<WithdrawnAuthorisation> queryChceckReturnDateDrivingLicense(int IdAuth) {
+        return LoginScreen.entityManager
+                .createQuery("SELECT e FROM withdrawnauthorisation e WHERE IdAuth = ?1")
+                .setParameter(1, IdAuth)
+                .getResultList();
+    }
+
+
     public void withdrawnDrivingLicense(String pesel) {
+        boolean validity = false;
+        int idAuthDrivingLicense = getIdDrivingLicense(pesel).getIdAuth();
         try {
-            int idAuthDrivingLicense = getIdDrivingLicense(pesel).getIdAuth();
-            DrivingLicense drivingLicense = new DrivingLicense();
-            drivingLicense.setIdAuth(idAuthDrivingLicense);
-
-            WithdrawnAuthorisation withdrawnAuthorisation = new WithdrawnAuthorisation();
-            withdrawnAuthorisation.setDataWithdrawn(LocalDateTime.now());
-            withdrawnAuthorisation.setReturnDateWithdrawn(LocalDateTime.now().plusMonths(3));
-            withdrawnAuthorisation.setDrivingLicense(drivingLicense);
-
-            commitData(withdrawnAuthorisation);
-            NewAlert newAlert = new NewAlert("Information", "Zgloszenie zostalo dodane",
-                    "Dodanie zgloszenia utraty prawa jazdy przebieglo pomyslnie");
+            List<WithdrawnAuthorisation> withdrawnAuthorisationList = queryChceckReturnDateDrivingLicense(idAuthDrivingLicense);
+            WithdrawnAuthorisation withdrawnAuthorisationLast = withdrawnAuthorisationList.get(withdrawnAuthorisationList.size() - 1);
+            validity = LocalDateTime.now().isBefore(withdrawnAuthorisationLast.getReturnDateWithdrawn());
         } catch (IndexOutOfBoundsException e) {
-            NewAlert newAlert = new NewAlert("Error", "Błąd w wyszukiwaniu",
-                    "Sprawdz poprawność wpisanego PESELu");
+        }
+        if (validity) {
+            new NewAlert("Information", "Blad dodawania zgloszenia", "Uprawnienia kierowcy zostaly juz odebrane wczesniej");
+        } else {
+            try {
+                DrivingLicense drivingLicense = new DrivingLicense();
+                drivingLicense.setIdAuth(idAuthDrivingLicense);
+
+                WithdrawnAuthorisation withdrawnAuthorisation = new WithdrawnAuthorisation();
+                withdrawnAuthorisation.setDataWithdrawn(LocalDateTime.now());
+                withdrawnAuthorisation.setReturnDateWithdrawn(LocalDateTime.now().plusMonths(3));
+                withdrawnAuthorisation.setDrivingLicense(drivingLicense);
+
+                commitData(withdrawnAuthorisation);
+                new NewAlert("Information", "Zgloszenie zostalo dodane",
+                        "Dodanie zgloszenia utraty prawa jazdy przebieglo pomyslnie");
+                addTemporaryAuthorisation(pesel);
+            } catch (Exception e) {
+                new NewAlert("Error", "Błąd w wyszukiwaniu",
+                        "Sprawdz poprawność wpisanego PESELu");
+            }
         }
     }
 
-    public void addTemporaryAuthorisation(String pesel){
+
+    public void addTemporaryAuthorisation(String pesel) {
         try {
             int idAuthDrivingLicense = getIdDrivingLicense(pesel).getIdAuth();
             DrivingLicense drivingLicense = new DrivingLicense();
@@ -74,10 +98,10 @@ public class LostPersonDocsTabController extends PersonTabController {
             temporaryAuthorisation.setDrivingLicense(drivingLicense);
 
             commitData(temporaryAuthorisation);
-            NewAlert newAlert = new NewAlert("Information", "Zgloszenie zostalo dodane",
+            new NewAlert("Information", "Zgloszenie zostalo dodane",
                     "Dodanie zgloszenia wydania pozwolenia tymczasowego na prawo jazdy przebieglo pomyslnie");
         } catch (IndexOutOfBoundsException e) {
-            NewAlert newAlert = new NewAlert("Error", "Błąd w wyszukiwaniu",
+            new NewAlert("Error", "Błąd w wyszukiwaniu",
                     "Sprawdz poprawność wpisanego PESELu");
         }
     }

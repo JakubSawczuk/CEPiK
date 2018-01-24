@@ -45,17 +45,17 @@ public class SearchByVIN extends SearchController {
                 .getResultList();
     }
 
-    public void getVehiclesOwnerByVin(){
+    public void getVehiclesOwnerByVin() {
         vehiclePerson = new ArrayList<String>();
-            List<Driver> vehicleOwner = queryGetVehiclesOwnerByVin();
-            if(vehicleOwner.size() != 0) {
-                for (Driver aVehicleOwner : vehicleOwner) {
-                    vehiclePerson.add(aVehicleOwner.getPeselDrv());
-                }
-            }else{
-                new NewAlert("Information", "Blad w wyszukiwaniu",
-                        "Wlasciciel nie jest kierowca");
+        List<Driver> vehicleOwner = queryGetVehiclesOwnerByVin();
+        if (vehicleOwner.size() != 0) {
+            for (Driver aVehicleOwner : vehicleOwner) {
+                vehiclePerson.add(aVehicleOwner.getPeselDrv());
             }
+        } else {
+            new NewAlert("Information", "Blad w wyszukiwaniu",
+                    "Wlasciciel nie jest kierowca");
+        }
     }
 
     public void VINsearchClicked() {
@@ -102,8 +102,7 @@ public class SearchByVIN extends SearchController {
         if (type.equals("SearchCarTabPane")) {
             getVehiclesOwnerByVin();
             super.searchPerson(vehiclePerson, grid);
-        }
-        else if (type.equals("LostCarDocsTabPane")) {
+        } else if (type.equals("LostCarDocsTabPane")) {
             LostCarDocsTabController lostCarDocsTabController = new LostCarDocsTabController();
             lostCarDocsTabController.withdrawnRegistraionDocument(VINnumber.getText());
             lostCarDocsTabController.addTemporaryAuthorisation(VINnumber.getText());

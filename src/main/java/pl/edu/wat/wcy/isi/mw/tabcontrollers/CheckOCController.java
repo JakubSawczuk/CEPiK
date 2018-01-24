@@ -41,7 +41,7 @@ public class CheckOCController extends SearchController {
         tableView.getItems().add(new TabRow("Data wygasniecia OC", formattedDateTimeExp));
 
         if (validity) {
-            NewAlert newAlert = new NewAlert("Information", "Niewazne OC", "OC samochodu jest niewazne");
+            new NewAlert("Information", "Niewazne OC", "OC samochodu jest niewazne");
         }
     }
 
@@ -49,9 +49,9 @@ public class CheckOCController extends SearchController {
         try {
             makeOCTable(queryGetOCbyVIN().get(0));
         } catch (HibernateException e) {
-            NewAlert newAlert = new NewAlert("Error", "Brak połączenia", "Sprawdz połączenie internetowe");
+            new NewAlert("Error", "Brak połączenia", "Sprawdz połączenie internetowe");
         } catch (IndexOutOfBoundsException e) {
-            NewAlert newAlert = new NewAlert("Error", "Błąd w wyszukiwaniu", "Sprawdz poprawność wpisanego VINu");
+            new NewAlert("Error", "Błąd w wyszukiwaniu", "Sprawdz poprawność wpisanego VINu");
         }
 
     }

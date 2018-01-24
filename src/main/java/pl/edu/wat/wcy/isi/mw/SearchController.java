@@ -12,7 +12,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import pl.edu.wat.wcy.isi.mw.tabcontrollers.CreateTicketTabController;
-import pl.edu.wat.wcy.isi.mw.tabcontrollers.LostPersonDocsTabController;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -114,9 +113,6 @@ public class SearchController {
         try {
             if(Integer.parseInt(points) < 0) throw new Exception();
             createTicketTabController.addMandate(comment, PESEL, points);
-            new NewAlert("Information", "Mandat zostal dodany pomyslnie",
-                    "Mandat zostal dodany pomyslnie");
-            createTicketTabController.checkPenaltyDriver(PESEL);
         }catch (Exception e){
             new NewAlert("Error", "Blad przy dodawaniu mandatu",
                     "Sprawdz poprawnosc danych");

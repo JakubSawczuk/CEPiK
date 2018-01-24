@@ -10,9 +10,18 @@ public class Person {
     private String street;
     private String buildingNr;
     private String residenceNr;
+    private String penalty;
+    private String categoryDL;
+    private String commentAuth;
+    private String dateAuth;
+    private String expDateAuth;
 
     public String getPesel() {
         return pesel;
+    }
+
+    public void setPenalty(String penalty) {
+        this.penalty = penalty;
     }
 
     public String getSurname() {
@@ -41,6 +50,42 @@ public class Person {
 
     public String getResidenceNr() {
         return residenceNr;
+    }
+
+    public String getPenalty() {
+        return penalty;
+    }
+
+    public String getCategoryDL() {
+        return categoryDL;
+    }
+
+    public String getCommentAuth() {
+        return commentAuth;
+    }
+
+    public String getDateAuth() {
+        return dateAuth;
+    }
+
+    public String getExpDateAuth() {
+        return expDateAuth;
+    }
+
+    public void setCategoryDL(String categoryDL) {
+        this.categoryDL = categoryDL;
+    }
+
+    public void setCommentAuth(String commentAuth) {
+        this.commentAuth = commentAuth;
+    }
+
+    public void setDateAuth(String dateAuth) {
+        this.dateAuth = dateAuth;
+    }
+
+    public void setExpDateAuth(String expDateAuth) {
+        this.expDateAuth = expDateAuth;
     }
 
     public void setPesel(String pesel) {
