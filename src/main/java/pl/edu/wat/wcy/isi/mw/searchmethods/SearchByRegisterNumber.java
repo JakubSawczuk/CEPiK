@@ -114,7 +114,6 @@ public class SearchByRegisterNumber extends SearchController {
                             "Tymczasowy dowod rejestracyjny traci waznosc: " + formattedTemporaryAuth);
             }
 
-
         } catch (Exception e) {
 
         }

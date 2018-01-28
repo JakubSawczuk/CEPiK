@@ -14,8 +14,6 @@ import javafx.stage.WindowEvent;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import java.io.IOException;
-import java.sql.SQLException;
 
 public class LoginScreen extends Application {
 
@@ -42,9 +40,7 @@ public class LoginScreen extends Application {
             } catch (Exception e) {
                 NewAlert newAlert = new NewAlert("Error", "Brak polaczenia",
                         "Sprawdz polaczenie z internetem");
-                newAlert.ErrorInLogin();
             }
-
 
             if (login.getText().length() == 0) {
                 peselPol = "84025099595";

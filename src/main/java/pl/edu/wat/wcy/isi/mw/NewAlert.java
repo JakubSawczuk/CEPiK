@@ -13,11 +13,4 @@ public class NewAlert {
         alert.setHeaderText(header);
         alert.showAndWait();
     }
-
-    public void ErrorInLogin(){
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("ZJEBALO SIE");
-        alert.setHeaderText("TYTUL TESTERA ROKU WEDRUJE DO: ");
-        alert.showAndWait();
-    }
 }
